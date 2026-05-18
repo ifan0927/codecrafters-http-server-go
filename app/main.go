@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -41,11 +42,52 @@ func handleConn(conn net.Conn) {
 		}
 	}(conn)
 
+	var request []byte
+	request = make([]byte, 1024)
+	n, err := conn.Read(request)
+	if err != nil {
+		fmt.Println("Error reading request: ", err.Error())
+		os.Exit(1)
+	}
+
+	buf := request[:n]
+	lines := strings.Split(string(buf), "\r\n")
+	if len(lines) == 0 {
+		fmt.Println("Empty request received")
+		return
+	}
+	firstLine := lines[0]
+	if firstLine == "" {
+		fmt.Println("Invalid request format")
+		return
+	}
+	// init space counter
+	count := 0
+	var sb strings.Builder
+	sb.Grow(64)
+	for _, char := range firstLine {
+		if char == ' ' {
+			count++
+		}
+		if count == 1 {
+			sb.WriteRune(char)
+		}
+	}
+	requestUrl := sb.String()
+	fmt.Println("Request handling completed")
+	fmt.Println("Request URL: ", requestUrl)
+
 	var response []byte
-	response = []byte("HTTP/1.1 200 OK\r\n\r\n")
-	_, err := conn.Write(response)
+
+	if len(requestUrl) == 2 {
+		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+	} else {
+		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+	}
+	_, err = conn.Write(response)
 	if err != nil {
 		fmt.Println("Error writing response: ", err.Error())
 		os.Exit(1)
 	}
+	return
 }
