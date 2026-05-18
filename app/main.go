@@ -20,7 +20,6 @@ func main() {
 	for {
 		var conn net.Conn
 		conn, err = l.Accept()
-		fmt.Println("Conn is connected to the server: ")
 		if err != nil {
 			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
@@ -35,7 +34,6 @@ func main() {
 
 func handleConn(conn net.Conn) {
 	defer func(conn net.Conn) {
-		fmt.Println("Closing connection...")
 		err := conn.Close()
 		if err != nil {
 			fmt.Println("Error closing connection: ", err.Error())
@@ -45,7 +43,6 @@ func handleConn(conn net.Conn) {
 
 	var response []byte
 	response = []byte("HTTP/1.1 200 OK\r\n\r\n")
-	fmt.Println("writing for response....")
 	_, err := conn.Write(response)
 	if err != nil {
 		fmt.Println("Error writing response: ", err.Error())
