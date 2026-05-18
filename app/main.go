@@ -6,25 +6,49 @@ import (
 	"os"
 )
 
-// Ensures gofmt doesn't remove the "net" and "os" imports above (feel free to remove this!)
-var _ = net.Listen
-var _ = os.Exit
-
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
-	// TODO: Uncomment the code below to pass the first stage
 	//
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
 		fmt.Println("Failed to bind to port 4221")
 		os.Exit(1)
 	}
-	
-	_, err = l.Accept()
+
+	for {
+		var conn net.Conn
+		conn, err = l.Accept()
+		fmt.Println("Conn is connected to the server: ")
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		if conn != nil {
+			fmt.Println("Connection established with client")
+			go handleConn(conn)
+		}
+	}
+
+}
+
+func handleConn(conn net.Conn) {
+	defer func(conn net.Conn) {
+		fmt.Println("Closing connection...")
+		err := conn.Close()
+		if err != nil {
+			fmt.Println("Error closing connection: ", err.Error())
+			os.Exit(1)
+		}
+	}(conn)
+
+	var response []byte
+	response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+	fmt.Println("writing for response....")
+	_, err := conn.Write(response)
 	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
+		fmt.Println("Error writing response: ", err.Error())
 		os.Exit(1)
 	}
 }
