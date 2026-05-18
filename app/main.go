@@ -52,34 +52,22 @@ func handleConn(conn net.Conn) {
 
 	buf := request[:n]
 	lines := strings.Split(string(buf), "\r\n")
-	if len(lines) == 0 {
-		fmt.Println("Empty request received")
-		return
-	}
 	firstLine := lines[0]
 	if firstLine == "" {
 		fmt.Println("Invalid request format")
 		return
 	}
 	// init space counter
-	count := 0
-	var sb strings.Builder
-	sb.Grow(64)
-	for _, char := range firstLine {
-		if char == ' ' {
-			count++
-		}
-		if count == 1 {
-			sb.WriteRune(char)
-		}
+	parts := strings.Fields(firstLine)
+	if len(parts) != 3 {
+		fmt.Println("Invalid request format")
+		return
 	}
-	requestUrl := sb.String()
-	fmt.Println("Request handling completed")
-	fmt.Println("Request URL: ", requestUrl)
+	requestUrl := parts[1]
 
 	var response []byte
 
-	if len(requestUrl) == 2 {
+	if requestUrl == "/" {
 		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 	} else {
 		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
