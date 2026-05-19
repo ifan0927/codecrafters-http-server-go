@@ -100,7 +100,7 @@ func getResponseBasedOnFamilyPath(path string) []byte {
 				return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			}
 			length := len(pathSegments[i+1])
-			return []byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", length, segment))
+			return []byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", length, pathSegments[i+1]))
 		}
 	}
 	return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
