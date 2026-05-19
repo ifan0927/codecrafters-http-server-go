@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -51,48 +50,40 @@ func handleConn(conn net.Conn) {
 		os.Exit(1)
 	}
 
-	requestUrl, err := handleRequestData(request, n)
+	var requestData RequestData
+	err = requestData.ParseRequest(request, n)
 	if err != nil {
 		fmt.Println("Error parsing request: ", err.Error())
 		os.Exit(1)
 	}
+	fmt.Println("Request Data:")
+	fmt.Println(requestData)
 
-	response := getResponseBasedOnPath(requestUrl)
+	response := getResponseBasedOnPath(requestData)
 	_, err = conn.Write(response)
 	if err != nil {
 		fmt.Println("Error writing response: ", err.Error())
 		os.Exit(1)
 	}
+
 	return
 }
 
-func handleRequestData(request []byte, n int) (string, error) {
-	buf := request[:n]
-	lines := strings.Split(string(buf), "\r\n")
-	firstLine := lines[0]
-	if firstLine == "" {
-		fmt.Println("Invalid request format")
-		return "", errors.New("invalid request format")
-	}
-	parts := strings.Fields(firstLine)
-	if len(parts) != 3 {
-		fmt.Println("Invalid request format")
-		return "", errors.New("invalid request format")
-	}
-	return parts[1], nil
-}
-
-func getResponseBasedOnPath(path string) []byte {
-	switch path {
+func getResponseBasedOnPath(requestData RequestData) []byte {
+	switch requestData.Url {
 	case "/":
 		return []byte("HTTP/1.1 200 OK\r\n\r\n")
+	case "/user-agent":
+		userAgent := requestData.Headers["User-Agent"]
+		contentLength := len(userAgent)
+		return []byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\n\r\n%s", contentLength, userAgent))
 	default:
-		return getResponseBasedOnFamilyPath(path)
+		return getResponseBasedOnFamilyPath(requestData)
 	}
 }
 
-func getResponseBasedOnFamilyPath(path string) []byte {
-	pathSegments := strings.Split(path, "/")
+func getResponseBasedOnFamilyPath(requestData RequestData) []byte {
+	pathSegments := strings.Split(requestData.Url, "/")
 
 	for i, segment := range pathSegments {
 		if strings.Contains(segment, "echo") {

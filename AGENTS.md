@@ -123,4 +123,6 @@ Technical terms stay in English.
 
 ## CodeCrafters related information
 1. this challenge is set to CodeCrafters's build your own HTTP server challenge
-2. When start a conversation with Codex, ask user which stage they are in, and check for that stage in the challenge description
+2. When starting a conversation with Codex, ask user which stage they are in.
+3. Before giving stage-specific guidance, Codex must check the actual stage description for that stage and follow the rules in this file.
+4. If Codex cannot access or verify the actual stage description, it must say so clearly and ask the user to paste the stage description before continuing with stage-specific help.
