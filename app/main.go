@@ -105,9 +105,8 @@ func getResponseBasedOnFamilyPath(requestData RequestData) []byte {
 			}
 			file, err := os.ReadFile(*FILEPATH + pathSegments[i+1])
 			if err != nil {
-				return nil
+				return []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			}
-			fmt.Println("File content: ", string(file))
 			return []byte(fmt.Sprintf("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: %d\r\n\r\n%s", len(file), file))
 		}
 	}
